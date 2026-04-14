@@ -23,49 +23,78 @@
         <nav class="navbar">
             <ul class="nav-links">
                 <li><a href="strona.html" class="active"><i class="fa-solid fa-gamepad"></i> Gry</a></li>
-                <li><a href="saldo.html"><i class="fa-solid fa-wallet"></i> Saldo</a></li>
-                <li><a href="historia.html"><i class="fa-solid fa-clock-rotate-left"></i> Historia gier</a></li>
-                <li class="auth-wrapper">
-                    <a href="#" class="btn-auth" onclick="openLoginModal(event)"><i class="fa-solid fa-user"></i> Logowanie / Rejestracja</a>
+                <li><a href="live.html"><i class="fa-solid fa-satellite-dish"></i> Kasyno na żywo</a></li>
+                <li class="auth-wrapper" style="margin-left: auto;">
+                    <!-- Zastępowane przez auth.js -->
                 </li>
             </ul>
         </nav>
     </header>
 
     <main class="main-content">
-        <section class="games-section">
-            <h2 class="section-title">Wybierz grę</h2>
-            <div class="games-grid">
-                <!-- Puste karty reprezentujące gry -->
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-dice"></i></div>
+        <section class="games-section" style="width: 100%; max-width: 1200px; padding: 0 1rem;">
+            <h2 class="section-title">Wybierz kategorię</h2>
+            
+            <h3 style="color: var(--accent-1); margin-bottom: 20px; font-size: 1.8rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;"><i class="fa-solid fa-slot-machine"></i> Automaty (Slots)</h3>
+            <div class="games-grid" style="margin-bottom: 3rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="game-card banner-card" style="aspect-ratio: 16/10; background: linear-gradient(135deg, #110022, #4400aa); background-size: cover; background-position: center;">
+                    <div class="game-icon" style="opacity: 0.2; transform: scale(1.5);"><i class="fa-solid fa-gem"></i></div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                        Diamond Slots
+                        <i class="fa-solid fa-gem" style="color: #bc13fe;"></i>
+                    </div>
                 </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-slot-machine"></i><i class="fa-solid fa-7"></i></div>
+                <div class="game-card banner-card" style="aspect-ratio: 16/10; background-image: url('images/slots_fire_1776201765832.png'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                        Fire Slots
+                        <i class="fa-solid fa-fire" style="color: #ff4d4d;"></i>
+                    </div>
                 </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-clover"></i></div>
+                <div class="game-card banner-card" style="aspect-ratio: 16/10; background-image: url('images/slots_lucky7_1776201812192.png'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                        Lucky 7 Slots
+                        <i class="fa-brands fa-envira" style="color: #00e676;"></i>
+                    </div>
                 </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-coins"></i></div>
+            </div>
+
+            <h3 style="color: var(--accent-2); margin-bottom: 20px; font-size: 1.8rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;"><i class="fa-solid fa-clone"></i> Gry Karciane</h3>
+            <div class="games-grid" style="margin-bottom: 3rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="game-card banner-card" style="aspect-ratio: 16/10; background-image: url('images/card_baccarat_1776201826903.png'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                        Baccarat
+                        <i class="fa-solid fa-diamond" style="color: #ff3366;"></i>
+                    </div>
                 </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-gem"></i></div>
+                <div class="game-card banner-card" style="aspect-ratio: 16/10; background-image: url('images/card_blackjack_1776202281919.png'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                        Blackjack
+                        <i class="fa-solid fa-spade" style="color: #ffffff;"></i>
+                    </div>
                 </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-sharp fa-solid fa-crown"></i></div>
+                <div class="game-card banner-card" style="aspect-ratio: 16/10; background-image: url('images/card_poker_1776202317856.png'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                        Hold'em Poker
+                        <i class="fa-solid fa-heart" style="color: #ff3366;"></i>
+                    </div>
                 </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-star"></i></div>
+            </div>
+
+            <h3 style="color: #00e676; margin-bottom: 20px; font-size: 1.8rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;"><i class="fa-solid fa-compact-disc"></i> Ruletka</h3>
+            <div class="games-grid" style="margin-bottom: 3rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="game-card banner-card" style="aspect-ratio: 16/10; background: linear-gradient(135deg, #0a1f10, #003311); background-size: cover; background-position: center;">
+                    <div class="game-icon" style="opacity: 0.15; transform: scale(1.5);"><i class="fa-solid fa-circle-notch"></i></div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                        European Roulette
+                        <i class="fa-solid fa-circle-notch" style="color: #00e676;"></i>
+                    </div>
                 </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-bolt"></i></div>
-                </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-heart"></i></div>
-                </div>
-                <div class="game-card">
-                    <div class="game-icon"><i class="fa-solid fa-fire"></i></div>
+                <div class="game-card banner-card" style="aspect-ratio: 16/10; background: linear-gradient(135deg, #1f0a0a, #330000); background-size: cover; background-position: center;">
+                    <div class="game-icon" style="opacity: 0.15; transform: scale(1.5);"><i class="fa-solid fa-rotate-left"></i></div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                        American Roulette
+                        <i class="fa-solid fa-rotate-left" style="color: #ff4d4d;"></i>
+                    </div>
                 </div>
             </div>
         </section>
@@ -192,5 +221,5 @@
             closeLoginModal();
         }
     </script>
-</body>
+<script src="auth.js"></script></body>
 </html>

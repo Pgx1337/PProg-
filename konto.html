@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasyno Online - Moje Konto</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dashboard-container {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-white);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(112, 0, 255, 0.2));
+            color: var(--text-white);
+            border-left: 4px solid var(--accent-1);
+        }
+
+        .content-area {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            min-height: 400px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-1));
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(112, 0, 255, 0.3);
+        }
+
+        .balance-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-top: 10px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+    </div>
+
+    <header class="header">
+        <div class="logo-container">
+            <h1 class="logo">[Nazwa Kasyna]</h1>
+            <div id="live-clock" class="live-clock"></div>
+        </div>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="strona.html"><i class="fa-solid fa-gamepad"></i> Gry</a></li>
+                <li><a href="live.html"><i class="fa-solid fa-satellite-dish"></i> Kasyno na żywo</a></li>
+                <li class="auth-wrapper" style="margin-left: auto;">
+                    <!-- Zastępowane przez auth.js -->
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <h2 class="section-title">Moje Konto</h2>
+        
+        <div class="dashboard-container">
+            <!-- Sidebar / zakładki -->
+            <aside class="sidebar">
+                <button class="tab-btn active" onclick="switchTab('tab-ogolne', this)"><i class="fa-solid fa-id-card"></i> Ogólne</button>
+                <button class="tab-btn" onclick="switchTab('tab-wplata', this)"><i class="fa-solid fa-arrow-down-long"></i> Wpłata</button>
+                <button class="tab-btn" onclick="switchTab('tab-wyplata', this)"><i class="fa-solid fa-arrow-up-long"></i> Wypłata</button>
+                <button class="tab-btn" onclick="switchTab('tab-historia', this)"><i class="fa-solid fa-clock-rotate-left"></i> Historia Gier</button>
+            </aside>
+
+            <!-- Treść zakładek -->
+            <section class="content-area">
+                
+                <!-- Ogólne -->
+                <div id="tab-ogolne" class="tab-content active">
+                    <div class="balance-card">
+                        <div style="font-size: 1.2rem; opacity: 0.9;">Dostępne Saldo</div>
+                        <div class="balance-value" id="display-balance">0.00 PLN</div>
+                    </div>
+
+                    <h3 style="margin-bottom: 20px; color: var(--accent-1);"><i class="fa-solid fa-circle-info"></i> Informacje o koncie</h3>
+                    <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                        <p style="margin-bottom: 10px; font-size: 1.1rem;"><span style="color: var(--text-muted); display: inline-block; width: 150px;">Nazwa gracza:</span> <strong id="info-username" style="color: var(--text-white);">...</strong></p>
+                        <p style="font-size: 1.1rem;"><span style="color: var(--text-muted); display: inline-block; width: 150px;">Status konta:</span> <span style="color: #00e676; font-weight: bold;"><i class="fa-solid fa-check-circle"></i> Aktywne (18+)</span></p>
+                    </div>
+                </div>
+
+                <!-- Wpłata -->
+                <div id="tab-wplata" class="tab-content">
+                    <h3 style="margin-bottom: 2rem; text-align: center; font-size: 1.8rem;">Zasil swoje saldo</h3>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <i class="fa-solid fa-coins"></i>
+                            <input type="number" id="deposit-amount" placeholder="Kwota PLN (np. 100)" min="1" step="0.01">
+                        </div>
+                        <button class="btn-submit" onclick="handleDeposit()"><i class="fa-solid fa-plus"></i> Wpłać środki</button>
+                        <div id="deposit-msg" style="text-align: center; margin-top: 10px; font-weight: bold;"></div>
+                    </div>
+                </div>
+
+                <!-- Wypłata -->
+                <div id="tab-wyplata" class="tab-content">
+                    <h3 style="margin-bottom: 2rem; text-align: center; font-size: 1.8rem;">Wypłać wygrane</h3>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <i class="fa-solid fa-money-bill-transfer"></i>
+                            <input type="number" id="withdraw-amount" placeholder="Kwota PLN (np. 50)" min="1" step="0.01">
+                        </div>
+                        <button class="btn-submit" onclick="handleWithdraw()" style="background: linear-gradient(135deg, #ff0055, #ff007f);"><i class="fa-solid fa-arrow-right-from-bracket"></i> Zleć Wypłatę</button>
+                        <div id="withdraw-msg" style="text-align: center; margin-top: 10px; font-weight: bold;"></div>
+                    </div>
+                </div>
+
+                <!-- Historia -->
+                <div id="tab-historia" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">Historia Transakcji i Gier</h3>
+                    <div id="transactions-container" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                            Ładowanie historii...
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const opcjeDaty = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dataStr = now.toLocaleDateString('pl-PL', opcjeDaty);
+            const dataStrCapitalized = dataStr.charAt(0).toUpperCase() + dataStr.slice(1);
+            const czasStr = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('live-clock').innerHTML = `<i class="fa-regular fa-calendar-days"></i> ${dataStrCapitalized} <span class="time-sep">|</span> <i class="fa-regular fa-clock"></i> <span class="time-text">${czasStr}</span>`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+            // reset messages
+            document.getElementById('deposit-msg').innerText = '';
+            document.getElementById('withdraw-msg').innerText = '';
+            
+            if (tabId === 'tab-historia') {
+                loadTransactions();
+            }
+        }
+
+        async function loadTransactions() {
+            const container = document.getElementById('transactions-container');
+            container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Ładowanie...</div>';
+            
+            try {
+                const res = await fetch('/api/transactions');
+                if (!res.ok) throw new Error('Błąd pobierania');
+                const transactions = await res.json();
+                
+                if (transactions.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; color: var(--text-muted); padding: 3rem; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px dashed var(--glass-border);">
+                            <i class="fa-solid fa-ghost" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                            <p>Brak historii transakcji. Zasil konto lub zagraj w gry!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = transactions.map(tx => {
+                    const isPositive = tx.type === 'DEPOSIT' || tx.type === 'WIN';
+                    const color = isPositive ? '#00e676' : '#ff4d4d';
+                    const icon = tx.type === 'DEPOSIT' ? 'fa-arrow-down' : 
+                                 tx.type === 'WITHDRAW' ? 'fa-arrow-up' : 
+                                 'fa-dice';
+                    const sign = isPositive ? '+' : '-';
+                    const dateObj = new Date(tx.created_at);
+                    
+                    return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; border-left: 4px solid ${color};">
+                        <div>
+                            <div style="font-weight: 600; text-transform: uppercase; font-size: 0.9rem; color: var(--text-muted);">
+                                <i class="fa-solid ${icon}"></i> ${tx.type}
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${dateObj.toLocaleString('pl-PL')}</div>
+                        </div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: ${color}; font-variant-numeric: tabular-nums;">
+                            ${sign}${tx.amount.toFixed(2)} PLN
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+            } catch(e) {
+                container.innerHTML = '<div style="color: #ff4d4d; text-align: center; padding: 1rem;">Błąd systemu.</div>';
+            }
+        }
+
+        // Transactions functions
+        async function handleDeposit() {
+            const amount = document.getElementById('deposit-amount').value;
+            const msgBox = document.getElementById('deposit-msg');
+            msgBox.innerText = 'Przetwarzanie...';
+            msgBox.style.color = 'var(--text-muted)';
+            
+            try {
+                const res = await fetch('/api/deposit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    msgBox.style.color = '#00e676';
+                    msgBox.innerText = data.message;
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    msgBox.style.color = '#ff4d4d';
+                    msgBox.innerText = data.error;
+                }
+            } catch (err) {
+                msgBox.style.color = '#ff4d4d';
+                msgBox.innerText = 'Błąd połączenia z serwerem.';
+            }
+        }
+
+        async function handleWithdraw() {
+            const amount = document.getElementById('withdraw-amount').value;
+            const msgBox = document.getElementById('withdraw-msg');
+            msgBox.innerText = 'Przetwarzanie...';
+            msgBox.style.color = 'var(--text-muted)';
+            
+            try {
+                const res = await fetch('/api/withdraw', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    msgBox.style.color = '#00e676';
+                    msgBox.innerText = data.message;
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    msgBox.style.color = '#ff4d4d';
+                    msgBox.innerText = data.error;
+                }
+            } catch (err) {
+                msgBox.style.color = '#ff4d4d';
+                msgBox.innerText = 'Błąd połączenia z serwerem.';
+            }
+        }
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>

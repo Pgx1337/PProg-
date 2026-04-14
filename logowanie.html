@@ -23,23 +23,138 @@
         <nav class="navbar">
             <ul class="nav-links">
                 <li><a href="strona.html"><i class="fa-solid fa-gamepad"></i> Gry</a></li>
-                <li><a href="saldo.html"><i class="fa-solid fa-wallet"></i> Saldo</a></li>
-                <li><a href="historia.html"><i class="fa-solid fa-clock-rotate-left"></i> Historia gier</a></li>
-                <li class="auth-wrapper">
-                    <a href="logowanie.html" class="btn-auth" style="transform: scale(1.05); box-shadow: 0 8px 25px rgba(255, 0, 127, 0.6);"><i class="fa-solid fa-user"></i> Logowanie / Rejestracja</a>
+                <li><a href="live.html"><i class="fa-solid fa-satellite-dish"></i> Kasyno na żywo</a></li>
+                <li class="auth-wrapper" style="margin-left: auto;">
+                    <!-- Zastępowane przez auth.js -->
                 </li>
             </ul>
         </nav>
     </header>
 
     <main class="main-content">
-        <section class="games-section">
-            <h2 class="section-title">Zaloguj się</h2>
-            <div style="font-size: 2rem; color: var(--text-muted); opacity: 0.5;">
-                Miejsce na formularz logowania i tworzenia konta
+        <section class="games-section" style="width: 100%; max-width: 1000px; display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;">
+            
+            <!-- FORMULARZ LOGOWANIA -->
+            <div class="modal-content" style="position: static; transform: none; box-shadow: 0 10px 30px rgba(112, 0, 255, 0.2); width: 100%; flex: 1; min-width: 300px;">
+                <h2 class="modal-title">Zaloguj się</h2>
+                <form id="login-form" class="login-form">
+                    <div class="input-group">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="login-username" placeholder="Nazwa użytkownika" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="Hasło" required>
+                    </div>
+                    <div id="login-msg" style="text-align: center; font-size: 0.9rem; font-weight: bold; margin-top: -10px;"></div>
+                    <button type="submit" class="btn-submit">Zaloguj</button>
+                </form>
             </div>
+
+            <!-- FORMULARZ REJESTRACJI -->
+            <div class="modal-content" style="position: static; transform: none; box-shadow: 0 10px 30px rgba(255, 0, 127, 0.1); width: 100%; flex: 1; min-width: 300px;">
+                <h2 class="modal-title">Zarejestruj się</h2>
+                <form id="register-form" class="login-form">
+                    <div class="input-group">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <input type="text" id="reg-username" placeholder="Nazwa użytkownika (min. 3 znaki)" minlength="3" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="reg-password" placeholder="Hasło (min. 6 znaków)" minlength="6" required>
+                    </div>
+                    
+                    <div class="input-group" style="display: flex; flex-direction: column; gap: 5px;">
+                        <label for="reg-birthdate" style="color: var(--text-muted); font-size: 0.9rem;">Data urodzenia (Wymagane 18+)</label>
+                        <div style="position: relative;">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <input type="date" id="reg-birthdate" required style="padding-left: 3rem; width: 100%;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 10px;">
+                        <input type="checkbox" id="reg-terms" required style="margin-top: 5px; width: 18px; height: 18px; accent-color: var(--accent-1);">
+                        <label for="reg-terms" style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.4;">
+                            Oświadczam, że mam ukończone 18 lat i akceptuję <a href="#" style="color: var(--accent-1); text-decoration: none;">Regulamin kasyna</a> oraz <a href="#" style="color: var(--accent-1); text-decoration: none;">Politykę Prywatności</a>. Rozumiem, że hazard wiąże się z ryzykiem.
+                        </label>
+                    </div>
+
+                    <div id="reg-msg" style="text-align: center; font-size: 0.9rem; font-weight: bold;"></div>
+                    
+                    <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, var(--accent-2), var(--accent-1));">Utwórz konto</button>
+                </form>
+            </div>
+
         </section>
     </main>
+
+    <script>
+        const API_URL = '/api';
+
+        // Obsługa Logowania
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const msgBox = document.getElementById('login-msg');
+            msgBox.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    msgBox.style.color = '#ff4d4d'; // czerwony
+                    msgBox.innerText = data.error || 'Błąd logowania.';
+                } else {
+                    msgBox.style.color = '#00e676'; // zielony
+                    msgBox.innerText = data.message;
+                    // Można np. zapisać w localStorage i przekierować
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    setTimeout(() => window.location.href = 'strona.html', 1500);
+                }
+            } catch (err) {
+                msgBox.style.color = '#ff4d4d';
+                msgBox.innerText = 'Błąd połączenia z serwerem.';
+            }
+        });
+
+        // Obsługa Rejestracji
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const birthdate = document.getElementById('reg-birthdate').value;
+            const termsAccepted = document.getElementById('reg-terms').checked;
+            const msgBox = document.getElementById('reg-msg');
+            msgBox.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, birthdate, termsAccepted })
+                });
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    msgBox.style.color = '#ff4d4d';
+                    msgBox.innerText = data.error || 'Błąd rejestracji.';
+                } else {
+                    msgBox.style.color = '#00e676';
+                    msgBox.innerText = data.message;
+                    document.getElementById('register-form').reset();
+                }
+            } catch (err) {
+                msgBox.style.color = '#ff4d4d';
+                msgBox.innerText = 'Błąd połączenia z serwerem.';
+            }
+        });
+    </script>
 
     <script>
         function updateClock() {
@@ -54,5 +169,5 @@
         setInterval(updateClock, 1000);
         updateClock();
     </script>
-</body>
+<script src="auth.js"></script></body>
 </html>
