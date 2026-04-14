@@ -86,6 +86,42 @@ body {
 
 .logo-container {
     margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.live-clock {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.5rem 1.2rem;
+    border-radius: 30px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    backdrop-filter: blur(5px);
+}
+
+.live-clock i {
+    color: var(--accent-2);
+}
+
+.live-clock .time-sep {
+    color: var(--accent-1);
+    opacity: 0.5;
+    margin: 0 5px;
+}
+
+.live-clock .time-text {
+    color: var(--text-white);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .logo {
@@ -266,4 +302,149 @@ body {
     .logo {
         font-size: 2rem;
     }
+}
+
+/* Modal logowania / rejestracji */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: rgba(15, 15, 25, 0.9);
+    border: 1px solid var(--accent-2);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    transform: translateY(-50px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 50px rgba(112, 0, 255, 0.3), inset 0 0 20px rgba(255, 0, 127, 0.1);
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0) scale(1);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: var(--accent-1);
+}
+
+.modal-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: var(--text-white);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-white);
+    font-family: inherit;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent-1);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+}
+
+.input-group input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.btn-submit {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: var(--text-white);
+    transition: all 0.3s;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(112, 0, 255, 0.5);
+}
+
+.switch-form-text {
+    text-align: center;
+    margin-top: 5px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.switch-form-text a {
+    color: var(--accent-1);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.switch-form-text a:hover {
+    color: var(--text-white);
+    text-decoration: underline;
 }

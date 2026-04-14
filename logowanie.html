@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasyno Online - Logowanie</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+    </div>
+
+    <header class="header">
+        <div class="logo-container">
+            <h1 class="logo">[Nazwa Kasyna]</h1>
+            <div id="live-clock" class="live-clock"></div>
+        </div>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="strona.html"><i class="fa-solid fa-gamepad"></i> Gry</a></li>
+                <li><a href="saldo.html"><i class="fa-solid fa-wallet"></i> Saldo</a></li>
+                <li><a href="historia.html"><i class="fa-solid fa-clock-rotate-left"></i> Historia gier</a></li>
+                <li class="auth-wrapper">
+                    <a href="logowanie.html" class="btn-auth" style="transform: scale(1.05); box-shadow: 0 8px 25px rgba(255, 0, 127, 0.6);"><i class="fa-solid fa-user"></i> Logowanie / Rejestracja</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section class="games-section">
+            <h2 class="section-title">Zaloguj się</h2>
+            <div style="font-size: 2rem; color: var(--text-muted); opacity: 0.5;">
+                Miejsce na formularz logowania i tworzenia konta
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const opcjeDaty = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dataStr = now.toLocaleDateString('pl-PL', opcjeDaty);
+            const dataStrCapitalized = dataStr.charAt(0).toUpperCase() + dataStr.slice(1);
+            const czasStr = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            document.getElementById('live-clock').innerHTML = `<i class="fa-regular fa-calendar-days"></i> ${dataStrCapitalized} <span class="time-sep">|</span> <i class="fa-regular fa-clock"></i> <span class="time-text">${czasStr}</span>`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>

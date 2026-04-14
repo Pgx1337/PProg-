@@ -18,14 +18,15 @@
     <header class="header">
         <div class="logo-container">
             <h1 class="logo">[Nazwa Kasyna]</h1>
+            <div id="live-clock" class="live-clock"></div>
         </div>
         <nav class="navbar">
             <ul class="nav-links">
-                <li><a href="#" class="active"><i class="fa-solid fa-gamepad"></i> Gry</a></li>
-                <li><a href="#"><i class="fa-solid fa-wallet"></i> Saldo</a></li>
-                <li><a href="#"><i class="fa-solid fa-clock-rotate-left"></i> Historia gier</a></li>
+                <li><a href="strona.html" class="active"><i class="fa-solid fa-gamepad"></i> Gry</a></li>
+                <li><a href="saldo.html"><i class="fa-solid fa-wallet"></i> Saldo</a></li>
+                <li><a href="historia.html"><i class="fa-solid fa-clock-rotate-left"></i> Historia gier</a></li>
                 <li class="auth-wrapper">
-                    <a href="#" class="btn-auth"><i class="fa-solid fa-user"></i> Logowanie / Rejestracja</a>
+                    <a href="#" class="btn-auth" onclick="openLoginModal(event)"><i class="fa-solid fa-user"></i> Logowanie / Rejestracja</a>
                 </li>
             </ul>
         </nav>
@@ -69,5 +70,127 @@
             </div>
         </section>
     </main>
+
+    <!-- Modal logowania / rejestracji -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeLoginModal()"><i class="fa-solid fa-xmark"></i></button>
+
+            <!-- Widok Logowania -->
+            <div id="login-view">
+                <h2 class="modal-title">Logowanie</h2>
+                <form class="login-form" id="login-form" onsubmit="handleLogin(event)">
+                    <div class="input-group">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" placeholder="Nazwa gracza" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" placeholder="Hasło" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Zaloguj się</button>
+                    <p class="switch-form-text">Nie masz konta? <a href="#" onclick="toggleModalView('register')">Zarejestruj się</a></p>
+                </form>
+            </div>
+
+            <!-- Widok Rejestracji -->
+            <div id="register-view" style="display: none;">
+                <h2 class="modal-title">Rejestracja</h2>
+                <form class="login-form" id="register-form" onsubmit="handleRegistration(event)">
+                    <div class="input-group">
+                        <i class="fa-solid fa-address-card"></i>
+                        <input type="text" placeholder="Imię" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-address-card"></i>
+                        <input type="text" placeholder="Nazwisko" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <input type="number" id="reg-age" placeholder="Wiek" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" placeholder="Nazwa użytkownika" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" placeholder="Hasło" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Stwórz konto</button>
+                    <p class="switch-form-text">Masz już konto? <a href="#" onclick="toggleModalView('login')">Zaloguj się</a></p>
+                </form>
+                <div id="age-error-msg" style="display: none; color: #ff3366; text-align: center; margin-top: 15px; font-weight: 600;">
+                    Ta strona jest tylko dla dorosłych. Nastąpi przekierowanie...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const opcjeDaty = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dataStr = now.toLocaleDateString('pl-PL', opcjeDaty);
+            const dataStrCapitalized = dataStr.charAt(0).toUpperCase() + dataStr.slice(1);
+            const czasStr = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            document.getElementById('live-clock').innerHTML = `<i class="fa-regular fa-calendar-days"></i> ${dataStrCapitalized} <span class="time-sep">|</span> <i class="fa-regular fa-clock"></i> <span class="time-text">${czasStr}</span>`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Funkcje obsługi modala
+        function openLoginModal(e) {
+            e.preventDefault();
+            document.getElementById('login-modal').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.remove('active');
+        }
+
+        // Zamykanie modala przy kliknięciu w zamazane tło
+        document.getElementById('login-modal').addEventListener('click', function(e) {
+            if(e.target === this) {
+                closeLoginModal();
+            }
+        });
+
+        // Przełączanie widoków
+        function toggleModalView(view) {
+            document.getElementById('login-view').style.display = view === 'login' ? 'block' : 'none';
+            document.getElementById('register-view').style.display = view === 'register' ? 'block' : 'none';
+            document.getElementById('age-error-msg').style.display = 'none'; // reset błędu
+        }
+
+        // Walidacja wieku i rejestracja
+        function handleRegistration(e) {
+            e.preventDefault();
+            const ageInput = document.getElementById('reg-age').value;
+            const age = parseInt(ageInput);
+            
+            if (age < 18) {
+                document.getElementById('age-error-msg').style.display = 'block';
+                // Usuwamy przycisk submit aby zablokować formularz
+                document.querySelector('#register-form .btn-submit').style.display = 'none';
+                
+                setTimeout(() => {
+                    window.location.href = "https://www.youtube.com/kids/";
+                }, 5000);
+            } else {
+                alert("Konto zostało utworzone pomyślnie!");
+                toggleModalView('login');
+            }
+        }
+
+        // Zalogowanie
+        function handleLogin(e) {
+            e.preventDefault();
+            localStorage.setItem('isLoggedIn', 'true');
+            alert("Pomyślnie zalogowano do kasyna!");
+            closeLoginModal();
+        }
+    </script>
 </body>
 </html>

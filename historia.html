@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasyno Online - Historia Gier</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+    </div>
+
+    <header class="header">
+        <div class="logo-container">
+            <h1 class="logo">[Nazwa Kasyna]</h1>
+            <div id="live-clock" class="live-clock"></div>
+        </div>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="strona.html"><i class="fa-solid fa-gamepad"></i> Gry</a></li>
+                <li><a href="saldo.html"><i class="fa-solid fa-wallet"></i> Saldo</a></li>
+                <li><a href="historia.html" class="active"><i class="fa-solid fa-clock-rotate-left"></i> Historia gier</a></li>
+                <li class="auth-wrapper">
+                    <a href="logowanie.html" class="btn-auth"><i class="fa-solid fa-user"></i> Logowanie / Rejestracja</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div id="content-protected" style="display: none; width: 100%;">
+            <section class="games-section">
+                <h2 class="section-title">Historia Twoich Gier</h2>
+                <div style="font-size: 2rem; color: var(--text-muted); opacity: 0.5;">
+                    Miejsce na zapis rozegranych partii i zdobytych wygranych
+                </div>
+            </section>
+        </div>
+        <div id="content-warning" style="display: none; text-align: center; margin-top: 5rem; width: 100%;">
+            <i class="fa-solid fa-lock" style="font-size: 5rem; color: var(--accent-1); margin-bottom: 2rem;"></i>
+            <h2 style="font-size: 2.5rem; color: var(--text-white); margin-bottom: 1rem;">Odmowa dostępu</h2>
+            <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem;">Musisz być zalogowany, aby przeglądać historię swoich gier.</p>
+            <a href="strona.html" class="btn-auth" style="display: inline-block; padding: 1rem 2rem; text-decoration: none; border-radius: 30px;"><i class="fa-solid fa-user"></i> Zaloguj się na stronie głównej</a>
+        </div>
+    </main>
+
+    <script>
+        // Sprawdzanie autoryzacji przy ładowaniu
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if(isLoggedIn === 'true') {
+                document.getElementById('content-protected').style.display = 'block';
+            } else {
+                document.getElementById('content-warning').style.display = 'block';
+            }
+        });
+        function updateClock() {
+            const now = new Date();
+            const opcjeDaty = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dataStr = now.toLocaleDateString('pl-PL', opcjeDaty);
+            const dataStrCapitalized = dataStr.charAt(0).toUpperCase() + dataStr.slice(1);
+            const czasStr = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            document.getElementById('live-clock').innerHTML = `<i class="fa-regular fa-calendar-days"></i> ${dataStrCapitalized} <span class="time-sep">|</span> <i class="fa-regular fa-clock"></i> <span class="time-text">${czasStr}</span>`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
