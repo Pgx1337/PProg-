@@ -1,0 +1,24 @@
+# zależności (często duże i niepotrzebne w repo)
+node_modules/
+
+# pliki środowiskowe (hasła, API keys)
+.env
+
+# build / output
+dist/
+build/
+
+# logi
+*.log
+
+# cache
+.cache/
+.tmp/
+
+# pliki systemowe
+.DS_Store
+Thumbs.db
+
+# IDE / edytory
+.vscode/
+.idea/
