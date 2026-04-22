@@ -46,6 +46,9 @@ W przypadku większych zmian otwórz najpierw issue.
 Projekt ma charakter edukacyjny.
 Nie jest przeznaczony do użytku komercyjnego ani hazardu na prawdziwe pieniądze bez odpowiednich licencji.
 
+## JAK ODPALIĆ NASZE KASYNO
+
+
 
 ## 👨‍💻 Autorzy:
 -Oliwier Pawlak
