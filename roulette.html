@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruletka - Juszkowo Royale</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .roulette-container { max-width: 1000px; margin: 2rem auto; background: rgba(20,20,30,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2rem; position: relative; box-shadow: 0 0 30px rgba(0, 230, 118, 0.1); }
+        .board { display: grid; gap: 5px; margin-top: 2rem; user-select: none; }
+        
+        .r-col { display: flex; flex-direction: column; gap: 5px; }
+        .r-cell { background: #222; border: 1px solid #444; border-radius: 5px; color: #fff; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; font-weight: bold; font-size: 1.2rem; transition: 0.2s; min-width: 50px; min-height: 50px; }
+        .r-cell:hover { filter: brightness(1.3); }
+        
+        .r-red { background: #ff3366; }
+        .r-black { background: #1a1a1a; }
+        .r-green { background: #00e676; color: #000; }
+        .r-action { background: #3388ff; font-size: 1rem; }
+
+        .chip { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+            border: 2px dashed #000; color: #000; font-size: 0.7rem; font-weight: 800; border-radius: 50%; min-width: 25px; height: 25px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.5); pointer-events: none; }
+
+        /* The Board Layout Container */
+        .board-layout { display: flex; align-items: stretch; gap: 5px; }
+        .zero-col { display: flex; flex-direction: column; justify-content: stretch; gap: 5px; }
+        .zero-col .r-cell { flex: 1; padding: 20px 10px; }
+        
+        .numbers-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; flex: 1; }
+        .row-bets { display: flex; flex-direction: column; justify-content: space-between; gap: 5px; }
+        .row-bets .r-cell { height: calc(100% / 3 - 3.5px); font-size: 0.9rem;}
+
+        .bottom-bets { display: flex; gap: 5px; margin-top: 5px; margin-left: 60px; margin-right: 60px; }
+        .bottom-bets .r-cell { flex: 1; padding: 10px; font-size: 1rem; }
+
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 10px; }
+        .btn-game { padding: 12px 25px; font-size: 1.1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-transform: uppercase; color: #fff; }
+        .btn-spin { background: #00e676; color: #000; font-size: 1.5rem; }
+        .btn-clear { background: #ff3366; }
+        .btn-game:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+        .wheel-display { font-size: 4rem; font-weight: 800; text-align: center; margin: 1rem 0; height: 100px; display: flex; justify-content: center; align-items: center; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .rolling { animation: scalePulse 0.5s infinite alternate; }
+        @keyframes scalePulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container"><h1 class="logo"><a href="strona.html" style="color: inherit; text-decoration: none;">Juszkowo Royale</a></h1></div>
+        <nav class="navbar"><ul class="nav-links"><li><a href="strona.html"><i class="fa-solid fa-gamepad"></i> Wróć do gier</a></li><li class="auth-wrapper" style="margin-left: auto;"></li></ul></nav>
+    </header>
+    <main class="main-content">
+        <div class="roulette-container">
+            <div id="login-overlay" style="display: none; position: absolute; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 20px; justify-content: center; align-items: center; flex-direction: column;">
+                <h2 style="color: #00e676; font-size: 2.5rem;"><i class="fa-solid fa-lock"></i> Brak Dostępu</h2>
+                <a href="logowanie.html" class="btn-game btn-spin" style="text-decoration: none; margin-top: 1rem;">Zaloguj się</a>
+            </div>
+
+            <h2 id="game-title" style="text-align: center; color: #00e676;"><i class="fa-solid fa-circle-notch"></i> Ruletka</h2>
+            <div class="wheel-display" id="wheel-display">-</div>
+            <div id="status-msg" style="text-align: center; font-size: 1.2rem; margin-bottom: 20px; color: #aaa;">Postaw żetony i zakręć!</div>
+
+            <!-- TABLICA -->
+            <div class="board">
+                <div class="board-layout">
+                    <div class="zero-col" id="zero-col">
+                        <!-- Zeros populated JS -->
+                    </div>
+                    <div class="numbers-grid" id="numbers-grid">
+                        <!-- Numbers populated JS -->
+                    </div>
+                    <div class="row-bets">
+                        <div class="r-cell r-action" data-bet="row-3">2:1</div>
+                        <div class="r-cell r-action" data-bet="row-2">2:1</div>
+                        <div class="r-cell r-action" data-bet="row-1">2:1</div>
+                    </div>
+                </div>
+
+                <div class="bottom-bets" style="margin-top: 5px;">
+                    <div class="r-cell r-action" data-bet="1st-12">1st 12</div>
+                    <div class="r-cell r-action" data-bet="2nd-12">2nd 12</div>
+                    <div class="r-cell r-action" data-bet="3rd-12">3rd 12</div>
+                </div>
+
+                <div class="bottom-bets">
+                    <div class="r-cell r-action" data-bet="1-18">1 to 18</div>
+                    <div class="r-cell r-action" data-bet="even">EVEN</div>
+                    <div class="r-cell r-red" data-bet="red">RED</div>
+                    <div class="r-cell r-black" data-bet="black">BLACK</div>
+                    <div class="r-cell r-action" data-bet="odd">ODD</div>
+                    <div class="r-cell r-action" data-bet="19-36">19 to 36</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div>
+                    <label style="font-size: 1.2rem; font-weight: bold;">Wartość żetonu:</label><br>
+                    <input type="number" id="chip-val" value="10" min="1" step="1" style="font-size: 1.5rem; padding: 5px; width: 100px; text-align: center; background: #222; color: #00e676; border: 1px solid #555; border-radius: 5px; font-weight: bold;"> PLN
+                </div>
+                <div>
+                    <div style="font-size: 1.2rem; color: #fff;">Suma zakładów: <span id="total-bet-display" style="font-weight: 800; color: #00e676;">0</span> PLN</div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-game btn-clear" id="btn-clear">Wyczyść Zakłady</button>
+                    <button class="btn-game btn-spin" id="btn-spin">KRĘĆ (SPIN)</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Setup Auth
+        let isLogged = false;
+        async function verifyAuth() {
+            try { 
+                if ((await fetch('/api/me')).ok) isLogged = true; 
+                else document.getElementById('login-overlay').style.display = 'flex';
+            } catch (e) { console.error(e); }
+        }
+        verifyAuth();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAmerican = urlParams.get('type') === 'am';
+        
+        const gameName = isAmerican ? 'ROULETTE AMERICAN' : 'ROULETTE EUROPEAN';
+        document.getElementById('game-title').innerHTML = isAmerican 
+            ? '<i class="fa-solid fa-rotate-left" style="color: #ff4d4d;"></i> American Roulette' 
+            : '<i class="fa-solid fa-circle-notch" style="color: #00e676;"></i> European Roulette';
+
+        const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+        const rows = [
+            [3,6,9,12,15,18,21,24,27,30,33,36],
+            [2,5,8,11,14,17,20,23,26,29,32,35],
+            [1,4,7,10,13,16,19,22,25,28,31,34]
+        ];
+
+        let bets = {}; // { id: amount }
+        function getNumberColor(num) {
+            if (num === 0 || num === '00') return 'green';
+            return redNumbers.includes(num) ? 'red' : 'black';
+        }
+
+        // Build Board
+        const zeroCol = document.getElementById('zero-col');
+        zeroCol.innerHTML += `<div class="r-cell r-green" data-bet="0">0</div>`;
+        if (isAmerican) {
+            zeroCol.innerHTML += `<div class="r-cell r-green" data-bet="00">00</div>`;
+        }
+
+        const numbersGrid = document.getElementById('numbers-grid');
+        for (let r = 0; r < 3; r++) {
+            rows[r].forEach(num => {
+                let colClass = getNumberColor(num) === 'red' ? 'r-red' : 'r-black';
+                let el = document.createElement('div');
+                el.className = `r-cell ${colClass}`;
+                el.innerText = num;
+                el.dataset.bet = num.toString();
+                numbersGrid.appendChild(el);
+            });
+        }
+
+        // Interaction
+        function updateBoardChips() {
+            document.querySelectorAll('.r-cell .chip').forEach(c => c.remove());
+            let sum = 0;
+            for (let [betId, amt] of Object.entries(bets)) {
+                if (amt > 0) {
+                    let cell = document.querySelector(`.r-cell[data-bet="${betId}"]`);
+                    if (cell) {
+                        let chip = document.createElement('div');
+                        chip.className = 'chip';
+                        chip.innerText = amt;
+                        cell.appendChild(chip);
+                    }
+                    sum += amt;
+                }
+            }
+            document.getElementById('total-bet-display').innerText = sum;
+            document.getElementById('btn-spin').disabled = sum === 0;
+        }
+
+        document.querySelectorAll('.r-cell').forEach(cell => {
+            cell.addEventListener('click', (e) => {
+                const betId = cell.dataset.bet;
+                if (!betId) return;
+                const chipVal = parseInt(document.getElementById('chip-val').value) || 10;
+                bets[betId] = (bets[betId] || 0) + chipVal;
+                updateBoardChips();
+            });
+            // Right click to remove bet
+            cell.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const betId = cell.dataset.bet;
+                if (!betId) return;
+                bets[betId] = 0;
+                updateBoardChips();
+            });
+        });
+
+        document.getElementById('btn-clear').addEventListener('click', () => { bets = {}; updateBoardChips(); });
+
+        // Logic
+        async function processBet(amt) {
+            const res = await fetch('/api/bet', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ amount: amt, gameName }) });
+            if (!res.ok) throw new Error((await res.json()).error);
+        }
+
+        async function processPayout(amt) {
+            await fetch('/api/payout', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ amount: amt, gameName }) });
+        }
+
+        function calculateWin(winNumberStr, allBets) {
+            let winNumInt = parseInt(winNumberStr); // NaN for '00'
+            let isZero = (winNumberStr === '0' || winNumberStr === '00');
+            let color = getNumberColor(isZero ? winNumberStr : winNumInt);
+            let payout = 0;
+
+            for (let [betType, amt] of Object.entries(allBets)) {
+                if (amt <= 0) continue;
+                
+                // Numbers
+                if (betType === winNumberStr) payout += amt * 36; // 35:1 profit -> 36x payout
+                if (isZero) continue; // Outside bets lose on zero
+
+                // Outside Bets
+                if (betType === color) payout += amt * 2;
+                if (betType === 'even' && winNumInt % 2 === 0) payout += amt * 2;
+                if (betType === 'odd' && winNumInt % 2 !== 0) payout += amt * 2;
+                if (betType === '1-18' && winNumInt >= 1 && winNumInt <= 18) payout += amt * 2;
+                if (betType === '19-36' && winNumInt >= 19 && winNumInt <= 36) payout += amt * 2;
+                
+                // Dozens
+                if (betType === '1st-12' && winNumInt >= 1 && winNumInt <= 12) payout += amt * 3;
+                if (betType === '2nd-12' && winNumInt >= 13 && winNumInt <= 24) payout += amt * 3;
+                if (betType === '3rd-12' && winNumInt >= 25 && winNumInt <= 36) payout += amt * 3;
+
+                // Rows
+                if (betType === 'row-1' && rows[2].includes(winNumInt)) payout += amt * 3;
+                if (betType === 'row-2' && rows[1].includes(winNumInt)) payout += amt * 3;
+                if (betType === 'row-3' && rows[0].includes(winNumInt)) payout += amt * 3;
+            }
+            return payout;
+        }
+
+        document.getElementById('btn-spin').addEventListener('click', async () => {
+            if(!isLogged) return;
+            let totalBet = 0;
+            for (let k in bets) totalBet += bets[k];
+            if (totalBet <= 0) return;
+
+            const stMsg = document.getElementById('status-msg');
+            const wheel = document.getElementById('wheel-display');
+            document.querySelectorAll('.btn-game').forEach(b => b.disabled = true);
+            
+            try {
+                await processBet(totalBet);
+            } catch(e) {
+                stMsg.innerText = e.message || "Błąd pobrania z konta.";
+                stMsg.style.color = "#ff3366";
+                document.querySelectorAll('.btn-game').forEach(b => b.disabled = false);
+                return;
+            }
+
+            stMsg.innerText = "Koło w ruchu...";
+            stMsg.style.color = "#fff";
+            wheel.classList.add('rolling');
+
+            // Generate Win Num
+            let rollValues = [];
+            for(let i=0; i<=36; i++) rollValues.push(i.toString());
+            if (isAmerican) rollValues.push('00');
+
+            // Fake spin animation
+            let spinTime = 0;
+            let finalNumber = rollValues[Math.floor(Math.random() * rollValues.length)];
+            let spinInterval = setInterval(() => {
+                wheel.innerText = rollValues[Math.floor(Math.random() * rollValues.length)];
+                let tempCol = getNumberColor(wheel.innerText === '00' ? '00' : parseInt(wheel.innerText));
+                wheel.style.color = tempCol === 'red' ? '#ff3366' : (tempCol === 'green' ? '#00e676' : '#fff');
+            }, 100);
+
+            setTimeout(async () => {
+                clearInterval(spinInterval);
+                wheel.classList.remove('rolling');
+                wheel.innerText = finalNumber;
+                let c = getNumberColor(finalNumber === '00' ? '00' : parseInt(finalNumber));
+                wheel.style.color = c === 'red' ? '#ff3366' : (c === 'green' ? '#00e676' : '#fff');
+
+                let totalPayout = calculateWin(finalNumber, bets);
+
+                if (totalPayout > 0) {
+                    stMsg.innerText = "Wygrywasz " + totalPayout + " PLN!";
+                    stMsg.style.color = "#00e676";
+                    await processPayout(totalPayout);
+                } else {
+                    stMsg.innerText = "Brak wygranej. Spróbuj ponownie!";
+                    stMsg.style.color = "#ff3366";
+                }
+
+                // Bets stay on board for re-betting
+                document.querySelectorAll('.btn-game').forEach(b => b.disabled = false);
+                setTimeout(() => document.dispatchEvent(new Event('DOMContentLoaded')), 500); // refresh auth.js balance
+            }, 3000);
+        });
+        
+        updateBoardChips();
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>

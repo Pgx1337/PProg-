@@ -117,7 +117,7 @@
 
     <header class="header">
         <div class="logo-container">
-            <h1 class="logo">[Nazwa Kasyna]</h1>
+            <h1 class="logo">Juszkowo Royale</h1>
             <div id="live-clock" class="live-clock"></div>
         </div>
         <nav class="navbar">
@@ -246,11 +246,16 @@
                 }
 
                 container.innerHTML = transactions.map(tx => {
-                    const isPositive = tx.type === 'DEPOSIT' || tx.type === 'WIN';
+                    const isPositive = tx.type === 'DEPOSIT' || tx.type.startsWith('WYGRANA');
                     const color = isPositive ? '#00e676' : '#ff4d4d';
-                    const icon = tx.type === 'DEPOSIT' ? 'fa-arrow-down' : 
-                                 tx.type === 'WITHDRAW' ? 'fa-arrow-up' : 
-                                 'fa-dice';
+                    
+                    let icon = 'fa-circle-dollar-to-slot';
+                    let displayType = tx.type;
+                    if (tx.type === 'DEPOSIT') { icon = 'fa-arrow-down'; displayType = 'WPŁATA'; }
+                    else if (tx.type === 'WITHDRAW') { icon = 'fa-arrow-up'; displayType = 'WYPŁATA'; }
+                    else if (tx.type.startsWith('WYGRANA')) { icon = 'fa-trophy'; }
+                    else if (tx.type.startsWith('ZAKŁAD')) { icon = 'fa-dice'; }
+
                     const sign = isPositive ? '+' : '-';
                     const dateObj = new Date(tx.created_at);
                     
@@ -258,7 +263,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; border-left: 4px solid ${color};">
                         <div>
                             <div style="font-weight: 600; text-transform: uppercase; font-size: 0.9rem; color: var(--text-muted);">
-                                <i class="fa-solid ${icon}"></i> ${tx.type}
+                                <i class="fa-solid ${icon}"></i> ${displayType}
                             </div>
                             <div style="font-size: 0.8rem; color: var(--text-muted);">${dateObj.toLocaleString('pl-PL')}</div>
                         </div>
@@ -278,6 +283,10 @@
         async function handleDeposit() {
             const amount = document.getElementById('deposit-amount').value;
             const msgBox = document.getElementById('deposit-msg');
+            const btn = document.querySelector('#tab-wplata .btn-submit');
+            
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
             msgBox.innerText = 'Przetwarzanie...';
             msgBox.style.color = 'var(--text-muted)';
             
@@ -296,16 +305,24 @@
                 } else {
                     msgBox.style.color = '#ff4d4d';
                     msgBox.innerText = data.error;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
                 }
             } catch (err) {
                 msgBox.style.color = '#ff4d4d';
                 msgBox.innerText = 'Błąd połączenia z serwerem.';
+                btn.disabled = false;
+                btn.style.opacity = '1';
             }
         }
 
         async function handleWithdraw() {
             const amount = document.getElementById('withdraw-amount').value;
             const msgBox = document.getElementById('withdraw-msg');
+            const btn = document.querySelector('#tab-wyplata .btn-submit');
+            
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
             msgBox.innerText = 'Przetwarzanie...';
             msgBox.style.color = 'var(--text-muted)';
             
@@ -324,13 +341,18 @@
                 } else {
                     msgBox.style.color = '#ff4d4d';
                     msgBox.innerText = data.error;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
                 }
             } catch (err) {
                 msgBox.style.color = '#ff4d4d';
                 msgBox.innerText = 'Błąd połączenia z serwerem.';
+                btn.disabled = false;
+                btn.style.opacity = '1';
             }
         }
     </script>
     <script src="auth.js"></script>
 </body>
 </html>
+

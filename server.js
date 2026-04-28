@@ -196,6 +196,40 @@ app.post('/api/withdraw', authenticateToken, (req, res) => {
     });
 });
 
+// Game Bet (Subtracts amount and records 'BET' transaction)
+app.post('/api/bet', authenticateToken, (req, res) => {
+    const amount = parseFloat(req.body.amount);
+    const gameName = req.body.gameName || 'GRA';
+    if (isNaN(amount) || amount <= 0) return res.status(400).json({ error: 'Nieprawidłowa kwota zakładu.' });
+
+    db.get(`SELECT balance FROM users WHERE id = ?`, [req.user.id], (err, row) => {
+        if (err || !row) return res.status(500).json({ error: 'Błąd serwera.' });
+        if (row.balance < amount) return res.status(400).json({ error: 'Niewystarczające środki na koncie, aby zagrać.' });
+
+        db.run(`UPDATE users SET balance = balance - ? WHERE id = ?`, [amount, req.user.id], function(err) {
+            if (err) return res.status(500).json({ error: 'Błąd podczas pobierania stawki.' });
+            db.run(`INSERT INTO transactions (user_id, type, amount) VALUES (?, ?, ?)`, [req.user.id, 'ZAKŁAD - ' + gameName, amount]);
+            res.json({ new_balance: row.balance - amount });
+        });
+    });
+});
+
+// Game Payout (Adds amount and records 'PAYOUT' transaction)
+app.post('/api/payout', authenticateToken, (req, res) => {
+    const amount = parseFloat(req.body.amount);
+    const gameName = req.body.gameName || 'GRA';
+    if (isNaN(amount) || amount <= 0) return res.status(400).json({ error: 'Nieprawidłowa kwota wygranej.' });
+
+    db.run(`UPDATE users SET balance = balance + ? WHERE id = ?`, [amount, req.user.id], function(err) {
+        if (err) return res.status(500).json({ error: 'Błąd podczas dodawania wygranej.' });
+        db.run(`INSERT INTO transactions (user_id, type, amount) VALUES (?, ?, ?)`, [req.user.id, 'WYGRANA - ' + gameName, amount]);
+        db.get(`SELECT balance FROM users WHERE id = ?`, [req.user.id], (err, row) => {
+            if(err || !row) return res.status(500).json({ error: 'Błąd synchronizacji salda.' });
+            res.json({ new_balance: row.balance });
+        });
+    });
+});
+
 // Get User Transactions
 app.get('/api/transactions', authenticateToken, (req, res) => {
     db.all(`SELECT * FROM transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`, [req.user.id], (err, rows) => {

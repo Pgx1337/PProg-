@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack - Kasyno</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bj-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: rgba(20,20,30,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0,255,100,0.1);
+        }
+        .cards-area {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            min-height: 150px;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .card {
+            width: 100px;
+            height: 140px;
+            background: #fff;
+            color: #000;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card.red { color: #ff3366; }
+        .card.black { color: #111; }
+        .card-corner-top, .card-corner-bottom {
+            position: absolute;
+            font-size: 1.2rem;
+        }
+        .card-corner-top { top: 5px; left: 5px; }
+        .card-corner-bottom { bottom: 5px; right: 5px; transform: rotate(180deg); }
+        
+        .controls {
+            margin-top: 3rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .btn-game {
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-hit {
+            background: #00e676;
+            color: #000;
+        }
+        .btn-hit:hover:not(:disabled) { background: #00ff84; }
+        
+        .btn-stand {
+            background: #ff3366;
+            color: #fff;
+        }
+        .btn-stand:hover:not(:disabled) { background: #ff4d7a; }
+        
+        .btn-start {
+            background: #bc13fe;
+            color: #fff;
+        }
+        
+        .btn-game:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 1.5rem 0;
+            height: 40px;
+            color: #00e676;
+            text-shadow: 0 0 10px rgba(0,230,118,0.5);
+        }
+        .score {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+        }
+        .score span {
+            color: #fff;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+    </div>
+
+    <header class="header">
+        <div class="logo-container">
+            <h1 class="logo"><a href="strona.html" style="color: inherit; text-decoration: none;">Juszkowo Royale</a></h1>
+        </div>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="strona.html"><i class="fa-solid fa-gamepad"></i> Wróć do gier</a></li>
+                <li class="auth-wrapper" style="margin-left: auto;"></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="bj-container" style="position: relative;">
+            <!-- Overlay dla niezalogowanych -->
+            <div id="login-overlay" style="display: none; position: absolute; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 20px; justify-content: center; align-items: center; flex-direction: column;">
+                <h2 style="color: #ff3366; font-size: 2.5rem; margin-bottom: 1rem;"><i class="fa-solid fa-lock"></i> Brak Dostępu</h2>
+                <p style="font-size: 1.2rem; color: #fff; margin-bottom: 2rem;">Musisz być zalogowany, aby grać i obstawiać.</p>
+                <a href="logowanie.html" class="btn-game btn-start" style="text-decoration: none;">Zaloguj się lub zarejestruj</a>
+            </div>
+
+            <h2 style="font-size: 2.5rem; margin-bottom: 10px;"><i class="fa-solid fa-spade"></i> Blackjack</h2>
+            <div class="status" id="status-msg">Kliknij "Nowa Gra", aby zacząć</div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="bet-amount" style="font-size: 1.2rem; font-weight: bold;">Zakład (PLN):</label>
+                <input type="number" id="bet-amount" value="10" min="1" style="font-size: 1.2rem; padding: 5px 10px; width: 100px; border-radius: 5px; border: 1px solid #333; background: #222; color: #fff; text-align: center; margin: 0 10px;">
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+                <div class="score">Krupier: <span id="dealer-score">0</span></div>
+                <div class="cards-area" id="dealer-cards"></div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <div id="main-hand-container" style="flex:1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border: 2px solid transparent;">
+                    <div class="score">Twoje karty: <span id="player-score">0</span></div>
+                    <div class="cards-area" id="player-cards"></div>
+                </div>
+                
+                <div id="split-hand-container" style="flex:1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; display: none; border: 2px solid transparent;">
+                    <div class="score">Ręka Split: <span id="split-score">0</span></div>
+                    <div class="cards-area" id="split-cards"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-game btn-hit" id="btn-hit" disabled><i class="fa-solid fa-plus"></i> Dobierz</button>
+                <button class="btn-game btn-stand" id="btn-stand" disabled><i class="fa-solid fa-hand"></i> Czekaj</button>
+                <button class="btn-game" id="btn-split" style="background: #3388ff; color: #fff; display: none;"><i class="fa-solid fa-arrows-split-up-and-left"></i> Split</button>
+                <button class="btn-game btn-start" id="btn-start"><i class="fa-solid fa-play"></i> Nowa Gra</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const suits = ['♠', '♥', '♦', '♣'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        
+        let deck = [];
+        let playerHand = [];
+        let splitHand = [];
+        let dealerHand = [];
+        let gameOver = true;
+        let activeHand = 'main'; // 'main' lub 'split'
+
+        const dealerArea = document.getElementById('dealer-cards');
+        const playerArea = document.getElementById('player-cards');
+        const splitArea = document.getElementById('split-cards');
+        const dealerScoreEl = document.getElementById('dealer-score');
+        const playerScoreEl = document.getElementById('player-score');
+        const splitScoreEl = document.getElementById('split-score');
+        const statusMsg = document.getElementById('status-msg');
+        
+        const btnHit = document.getElementById('btn-hit');
+        const btnStand = document.getElementById('btn-stand');
+        const btnSplit = document.getElementById('btn-split');
+        const btnStart = document.getElementById('btn-start');
+        const betInput = document.getElementById('bet-amount');
+        const loginOverlay = document.getElementById('login-overlay');
+        
+        let currentBet = 0;
+        let isLogged = false;
+
+        async function verifyAuth() {
+            try {
+                if ((await fetch('/api/me')).ok) {
+                    isLogged = true; loginOverlay.style.display = 'none';
+                } else {
+                    isLogged = false; loginOverlay.style.display = 'flex';
+                }
+            } catch (err) { console.error(err); }
+        }
+        verifyAuth();
+
+        function createDeck() {
+            deck = [];
+            for (let suit of suits) for (let value of values) deck.push({ suit, value });
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function getCardValue(card) {
+            if (['J', 'Q', 'K'].includes(card.value)) return 10;
+            if (card.value === 'A') return 11;
+            return parseInt(card.value);
+        }
+
+        function calculateScore(hand) {
+            let score = 0, aces = 0;
+            for (let card of hand) {
+                score += getCardValue(card);
+                if (card.value === 'A') aces += 1;
+            }
+            while (score > 21 && aces > 0) { score -= 10; aces -= 1; }
+            return score;
+        }
+
+        function renderCard(card, hidden = false) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            if (hidden) {
+                div.style.background = 'linear-gradient(135deg, #222, #000)';
+                div.style.color = '#fff';
+                div.innerHTML = '<i class="fa-solid fa-gem" style="opacity: 0.3; font-size: 3rem;"></i>';
+            } else {
+                div.classList.add(card.suit === '♥' || card.suit === '♦' ? 'red' : 'black');
+                div.innerHTML = `<div class="card-corner-top">${card.value}<br>${card.suit}</div><div style="font-size: 3rem;">${card.suit}</div><div class="card-corner-bottom">${card.value}<br>${card.suit}</div>`;
+            }
+            return div;
+        }
+
+        function updateUI(hideDealerCard = false) {
+            playerArea.innerHTML = '';
+            for (let card of playerHand) playerArea.appendChild(renderCard(card));
+            playerScoreEl.textContent = calculateScore(playerHand);
+
+            if (splitHand.length > 0) {
+                document.getElementById('split-hand-container').style.display = 'block';
+                splitArea.innerHTML = '';
+                for (let card of splitHand) splitArea.appendChild(renderCard(card));
+                splitScoreEl.textContent = calculateScore(splitHand);
+            } else {
+                document.getElementById('split-hand-container').style.display = 'none';
+            }
+
+            dealerArea.innerHTML = '';
+            dealerHand.forEach((card, index) => {
+                if (index === 1 && hideDealerCard) dealerArea.appendChild(renderCard(card, true));
+                else dealerArea.appendChild(renderCard(card));
+            });
+            
+            if (hideDealerCard) dealerScoreEl.textContent = getCardValue(dealerHand[0]) + " + ?";
+            else dealerScoreEl.textContent = calculateScore(dealerHand);
+
+            // Highlight active hand
+            document.getElementById('main-hand-container').style.borderColor = (activeHand === 'main' && !gameOver) ? '#00e676' : 'transparent';
+            document.getElementById('split-hand-container').style.borderColor = (activeHand === 'split' && !gameOver) ? '#00e676' : 'transparent';
+            
+            // Toggle split button
+            if (playerHand.length === 2 && getCardValue(playerHand[0]) === getCardValue(playerHand[1]) && splitHand.length === 0 && !gameOver) {
+                btnSplit.style.display = 'inline-block';
+            } else {
+                btnSplit.style.display = 'none';
+            }
+        }
+
+        async function createBetRequest(amount) {
+            const response = await fetch('/api/bet', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amount, gameName: 'BLACKJACK' })
+            });
+            if (!response.ok) throw new Error((await response.json()).error);
+        }
+
+        async function processPayout(amount) {
+            await fetch('/api/payout', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amount, gameName: 'BLACKJACK' })
+            });
+        }
+
+        async function startGame() {
+            if (!isLogged) return;
+            const betVal = parseFloat(betInput.value);
+            if (isNaN(betVal) || betVal <= 0) return alert("Wprowadź poprawną stawkę.");
+
+            btnStart.disabled = true;
+            statusMsg.textContent = 'Przyjmowanie zakładu...';
+
+            try {
+                await createBetRequest(betVal);
+                currentBet = betVal;
+            } catch (e) {
+                endGame('Błąd sieciowy lub brak środków: ' + e.message, '#ff3366');
+                return;
+            }
+
+            createDeck();
+            splitHand = [];
+            activeHand = 'main';
+            playerHand = [deck.pop(), deck.pop()];
+            dealerHand = [deck.pop(), deck.pop()];
+            gameOver = false;
+            
+            btnHit.disabled = false; btnStand.disabled = false;
+            statusMsg.textContent = 'Twój ruch (Ręka główna)...';
+            statusMsg.style.color = '#fff';
+            betInput.disabled = true;
+            
+            updateUI(true);
+
+            if (calculateScore(playerHand) === 21) {
+                statusMsg.textContent = 'Trwa rozliczanie (Blackjack!)...';
+                await processPayout(currentBet * 2.5);
+                endGame('Trafiłeś Blackjacka! Wygrywasz rękę!', '#00e676');
+            }
+        }
+
+        async function split() {
+            if (gameOver || activeHand !== 'main') return;
+            try {
+                await createBetRequest(currentBet); // double the bet for the second hand
+            } catch (e) {
+                alert("Błąd: Nie masz wystarczających środków na rozdzielenie rąk.");
+                return;
+            }
+            splitHand.push(playerHand.pop());
+            // Deal one card to each hand
+            playerHand.push(deck.pop());
+            splitHand.push(deck.pop());
+            updateUI(true);
+            btnSplit.style.display = 'none';
+            statusMsg.textContent = 'Grana ręka główna...';
+        }
+
+        function hit() {
+            if (gameOver) return;
+            if (activeHand === 'main') {
+                playerHand.push(deck.pop());
+                if (calculateScore(playerHand) > 21) {
+                    if (splitHand.length > 0) {
+                        activeHand = 'split'; 
+                        statusMsg.textContent = 'Główna fura! Grana ręka split...';
+                    } else endGame('Fura! Przekroczyłeś 21. Przegrywasz.', '#ff3366');
+                }
+            } else {
+                splitHand.push(deck.pop());
+                if (calculateScore(splitHand) > 21) standLogic(); // Move to dealer to resolve both
+            }
+            updateUI(true);
+        }
+
+        async function stand() {
+            if (gameOver) return;
+            if (activeHand === 'main' && splitHand.length > 0) {
+                activeHand = 'split';
+                statusMsg.textContent = 'Grana ręka split...';
+                updateUI(true);
+            } else {
+                await standLogic();
+            }
+        }
+
+        async function standLogic() {
+            activeHand = 'none';
+            btnHit.disabled = true; btnStand.disabled = true; btnSplit.style.display = 'none';
+            updateUI(false); 
+
+            let dealerScore = calculateScore(dealerHand);
+            statusMsg.textContent = 'Krupier dobiera...';
+            
+            // Only draw if not everyone bursted
+            let mainBust = calculateScore(playerHand) > 21;
+            let splitBust = splitHand.length > 0 ? calculateScore(splitHand) > 21 : true;
+
+            if (!mainBust || !splitBust) {
+                while (dealerScore < 17) {
+                    await new Promise(r => setTimeout(r, 800));
+                    dealerHand.push(deck.pop());
+                    dealerScore = calculateScore(dealerHand);
+                    updateUI(false);
+                }
+            }
+
+            // Resolve Main Hand
+            let mainPayout = 0;
+            let mScore = calculateScore(playerHand);
+            if (mScore <= 21) {
+                if (dealerScore > 21 || mScore > dealerScore) mainPayout = currentBet * 2;
+                else if (mScore === dealerScore) mainPayout = currentBet;
+            }
+
+            // Resolve Split Hand
+            let splitPayout = 0;
+            if (splitHand.length > 0) {
+                let sScore = calculateScore(splitHand);
+                if (sScore <= 21) {
+                    if (dealerScore > 21 || sScore > dealerScore) splitPayout = currentBet * 2;
+                    else if (sScore === dealerScore) splitPayout = currentBet;
+                }
+            }
+
+            let totalPayout = mainPayout + splitPayout;
+            if (totalPayout > 0) {
+                statusMsg.textContent = 'Wypłacanie środków (` + totalPayout + ` PLN)...';
+                await processPayout(totalPayout);
+            }
+
+            let resultMsg = 'Koniec gry. ';
+            if (totalPayout > currentBet * (splitHand.length > 0 ? 2 : 1)) resultMsg += 'Wygrywasz!';
+            else if (totalPayout > 0) resultMsg += 'Zysk/Zwrot!';
+            else resultMsg += 'Przegrywasz.';
+
+            endGame(resultMsg, totalPayout > 0 ? '#00e676' : '#ff3366');
+        }
+
+        function endGame(msg, color) {
+            gameOver = true;
+            statusMsg.textContent = msg;
+            statusMsg.style.color = color;
+            btnHit.disabled = true;
+            btnStand.disabled = true;
+            btnSplit.style.display = 'none';
+            btnStart.disabled = false;
+            betInput.disabled = false;
+            updateUI(false);
+            
+            setTimeout(() => document.dispatchEvent(new Event('DOMContentLoaded')), 1000);
+        }
+
+        btnStart.addEventListener('click', startGame);
+        btnHit.addEventListener('click', hit);
+        btnStand.addEventListener('click', stand);
+        btnSplit.addEventListener('click', split);
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>
+

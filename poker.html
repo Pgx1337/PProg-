@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texas Hold'em Poker - Kasyno</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .poker-container { max-width: 900px; margin: 2rem auto; background: rgba(20,20,30,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2rem; text-align: center; box-shadow: 0 0 30px rgba(112, 0, 255, 0.1); position: relative; }
+        .cards-area { display: flex; justify-content: center; gap: 10px; min-height: 140px; margin: 1rem 0; }
+        .board-area { display: flex; justify-content: center; gap: 10px; background: rgba(0, 255, 118, 0.1); padding: 20px; border-radius: 15px; min-height: 140px; margin: 2rem 0; border: 1px solid rgba(0,255,118,0.2); }
+        .card { width: 90px; height: 130px; background: #fff; color: #000; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative; }
+        .card.red { color: #ff3366; } .card.black { color: #111; }
+        .card-corner-top, .card-corner-bottom { position: absolute; font-size: 1rem; }
+        .card-corner-top { top: 5px; left: 5px; } .card-corner-bottom { bottom: 5px; right: 5px; transform: rotate(180deg); }
+        .controls { margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .btn-game { padding: 12px 25px; font-size: 1.1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-transform: uppercase; color: #fff; }
+        .btn-call { background: #00e676; color: #000; }
+        .btn-fold { background: #ff3366; }
+        .btn-deal { background: #bc13fe; }
+        .btn-game:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .status { font-size: 1.5rem; font-weight: 800; margin: 1rem 0; height: 40px; color: #fff; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container"><h1 class="logo"><a href="strona.html" style="color: inherit; text-decoration: none;">Juszkowo Royale</a></h1></div>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="strona.html"><i class="fa-solid fa-gamepad"></i> Wróć do gier</a></li>
+                <li class="auth-wrapper" style="margin-left: auto;"></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="main-content">
+        <div class="poker-container">
+            <div id="login-overlay" style="display: none; position: absolute; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 20px; justify-content: center; align-items: center; flex-direction: column;">
+                <h2 style="color: #bc13fe; font-size: 2.5rem;"><i class="fa-solid fa-lock"></i> Brak Dostępu</h2>
+                <a href="logowanie.html" class="btn-game btn-deal" style="text-decoration: none; margin-top: 1rem;">Zaloguj się</a>
+            </div>
+            
+            <h2><i class="fa-solid fa-heart" style="color: #ff3366;"></i> Casino Hold'em Poker</h2>
+            <div class="status" id="status-msg">Postaw ANTE aby zagrać!</div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 1.2rem; font-weight: bold;">Zakład Ante (PLN):</label>
+                <input type="number" id="bet-amount" value="10" min="1" style="font-size: 1.2rem; padding: 5px; width: 100px; text-align: center; margin: 0 10px; background: #222; color: #fff; border: 1px solid #555; border-radius: 5px;">
+                <label style="font-size: 1.2rem; font-weight: bold; margin-left:15px;">Przeciwnicy:</label>
+                <select id="opponents-count" style="font-size: 1.2rem; padding: 5px; width: auto; margin: 0 10px; background: #222; color: #fff; border: 1px solid #555; border-radius: 5px;">
+                    <option value="1">1 (Oderwanie: x2)</option>
+                    <option value="2">2 (Oderwanie: x3)</option>
+                    <option value="3">3 (Oderwanie: x4)</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <div style="flex: 1; text-align: left;">
+                    <div style="font-size: 1.2rem; margin-bottom: 5px;">Karty Krupiera:</div>
+                    <div class="cards-area" id="dealer-cards" style="justify-content: flex-start;"></div>
+                </div>
+                <div style="flex: 1; text-align: right;">
+                    <div style="font-size: 1.2rem; margin-bottom: 5px;">Twoje Karty:</div>
+                    <div class="cards-area" id="player-cards" style="justify-content: flex-end;"></div>
+                </div>
+            </div>
+
+            <div style="font-size: 1.2rem; margin-top: 1rem;">Flop / Turn / River (Środek stołu):</div>
+            <div class="board-area" id="board-cards"></div>
+
+            <div class="controls">
+                <button class="btn-game btn-deal" id="btn-deal">Rozdaj (Stawia Ante)</button>
+                <button class="btn-game btn-call" id="btn-call" disabled>Sprawdzam (Call x2)</button>
+                <button class="btn-game btn-fold" id="btn-fold" disabled>Pas (Fold)</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let isLogged = false;
+        async function verifyAuth() {
+            try {
+                if ((await fetch('/api/me')).ok) isLogged = true;
+                else document.getElementById('login-overlay').style.display = 'flex';
+            } catch (e) { console.error(e); }
+        }
+        verifyAuth();
+
+        const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        const suits = ['♠','♥','♦','♣'];
+        const getV = (r) => ranks.indexOf(r) + 2;
+
+        function getCombinations(arr, k) {
+            const results = [];
+            function helper(start, combo) {
+                if (combo.length === k) { results.push([...combo]); return; }
+                for (let i = start; i < arr.length; i++) {
+                    combo.push(arr[i]);
+                    helper(i + 1, combo);
+                    combo.pop();
+                }
+            }
+            helper(0, []);
+            return results;
+        }
+
+        function score5(cards) {
+            let sorted = [...cards].sort((a,b) => b.val - a.val);
+            let flush = sorted.every(c => c.suit === sorted[0].suit);
+            let straight = true;
+            for(let i=0; i<4; i++) if(sorted[i].val - 1 !== sorted[i+1].val) straight = false;
+            
+            let isLowStraight = false;
+            if(!straight && sorted[0].val===14 && sorted[1].val===5 && sorted[2].val===4 && sorted[3].val===3 && sorted[4].val===2) {
+                straight = true; isLowStraight = true;
+            }
+            
+            let counts = {};
+            sorted.forEach(c => counts[c.val] = (counts[c.val]||0)+1);
+            let countsArr = Object.entries(counts).sort((a,b) => b[1]-a[1] || parseInt(b[0])-parseInt(a[0]));
+            
+            let score = 0;
+            if(straight && flush) score = 8;
+            else if(countsArr[0][1] === 4) score = 7;
+            else if(countsArr[0][1] === 3 && countsArr[1][1] === 2) score = 6;
+            else if(flush) score = 5;
+            else if(straight) score = 4;
+            else if(countsArr[0][1] === 3) score = 3;
+            else if(countsArr[0][1] === 2 && countsArr[1][1] === 2) score = 2;
+            else if(countsArr[0][1] === 2) score = 1;
+            else score = 0;
+            
+            let tiebreaker = score * 10000000000;
+            let multiplier = 100000000;
+            if (isLowStraight) { tiebreaker += 5 * multiplier; } 
+            else {
+                for(let entry of countsArr) {
+                    let val = parseInt(entry[0]);
+                    for(let i=0; i<entry[1]; i++) { tiebreaker += val * multiplier; multiplier /= 100; }
+                }
+            }
+            return tiebreaker;
+        }
+
+        function evaluate7Cards(playerCards, boardCards) {
+            let all = [...playerCards, ...boardCards];
+            let combos = getCombinations(all, 5);
+            let best = -1;
+            combos.forEach(c => { let s = score5(c); if(s > best) best = s; });
+            return best;
+        }
+
+        function renderCard(card, hidden=false) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            if (hidden) {
+                div.style.background = 'linear-gradient(135deg, #111, #333)';
+                div.style.color = '#fff';
+                div.innerHTML = '<i class="fa-solid fa-gem" style="opacity:0.2;"></i>';
+            } else {
+                if (card.suit === '♥' || card.suit === '♦') div.classList.add('red');
+                else div.classList.add('black');
+                div.innerHTML = `<div class="card-corner-top">${card.rank}<br>${card.suit}</div><div style="font-size:2.5rem;">${card.suit}</div><div class="card-corner-bottom">${card.rank}<br>${card.suit}</div>`;
+            }
+            return div;
+        }
+
+        let deck = [], playerHand = [], opponentsHands = [], board = [], ante = 0, opponentsCount = 1;
+        const btnDeal = document.getElementById('btn-deal');
+        const btnCall = document.getElementById('btn-call');
+        const btnFold = document.getElementById('btn-fold');
+        const dArea = document.getElementById('dealer-cards');
+        const pArea = document.getElementById('player-cards');
+        const bArea = document.getElementById('board-cards');
+        const stMsg = document.getElementById('status-msg');
+
+        async function processBet(amt) {
+            const res = await fetch('/api/bet', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({amount:amt, gameName:'POKER'}) });
+            if(!res.ok) throw new Error((await res.json()).error);
+        }
+
+        async function processPayout(amt) {
+            await fetch('/api/payout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({amount:amt, gameName:'POKER'}) });
+        }
+
+        btnDeal.addEventListener('click', async () => {
+            if(!isLogged) return;
+            const betInput = document.getElementById('bet-amount');
+            ante = parseFloat(betInput.value);
+            opponentsCount = parseInt(document.getElementById('opponents-count').value) || 1;
+            
+            if(isNaN(ante) || ante<=0) return alert('Wprowadź stawkę ANTE.');
+
+            btnDeal.disabled = true; betInput.disabled = true; document.getElementById('opponents-count').disabled = true; 
+            stMsg.textContent = 'Trwa zakład...';
+
+            try { await processBet(ante); } catch (e) { 
+                stMsg.textContent = e.message || 'Błąd'; btnDeal.disabled = false; betInput.disabled = false; document.getElementById('opponents-count').disabled = false; return; 
+            }
+
+            // Init game
+            deck = [];
+            suits.forEach(suit => ranks.forEach(rank => deck.push({suit, rank, val: getV(rank)})));
+            deck.sort(() => Math.random() - 0.5);
+
+            playerHand = [deck.pop(), deck.pop()];
+            opponentsHands = [];
+            for(let i=0; i<opponentsCount; i++) {
+                opponentsHands.push([deck.pop(), deck.pop()]);
+            }
+            board = [deck.pop(), deck.pop(), deck.pop()]; // Flop
+
+            // Render
+            pArea.innerHTML = ''; dArea.innerHTML = ''; bArea.innerHTML = '';
+            playerHand.forEach(c => pArea.appendChild(renderCard(c)));
+            opponentsHands.forEach((hand, idx) => {
+                let w = document.createElement('div');
+                w.style.display = 'inline-flex'; w.style.gap='5px'; w.style.marginRight='15px';
+                hand.forEach(c => w.appendChild(renderCard(c, true)));
+                dArea.appendChild(w);
+            });
+            board.forEach(c => bArea.appendChild(renderCard(c)));
+
+            stMsg.textContent = 'Graj (CALL za 2x Ante: '+(ante*2)+' PLN) albo Pas (FOLD, tracisz Ante)';
+            btnCall.disabled = false; btnFold.disabled = false;
+        });
+
+        btnFold.addEventListener('click', () => {
+            btnCall.disabled = true; btnFold.disabled = true; btnDeal.disabled = false; 
+            document.getElementById('bet-amount').disabled = false; document.getElementById('opponents-count').disabled = false;
+            stMsg.textContent = 'Spasowałeś. Tracisz ANTE.'; stMsg.style.color = '#ff3366';
+        });
+
+        btnCall.addEventListener('click', async () => {
+            btnCall.disabled = true; btnFold.disabled = true;
+            stMsg.textContent = 'Pobieram zakład CALL...';
+            try { await processBet(ante * 2); } catch (e) {
+                stMsg.textContent = 'Błąd pobierania CALL. Przeładuj stronę.'; return; // In realistic app we handles rollbacks
+            }
+
+            // Deal turn & river
+            board.push(deck.pop()); board.push(deck.pop());
+            bArea.innerHTML = ''; board.forEach(c => bArea.appendChild(renderCard(c)));
+            
+            dArea.innerHTML = ''; 
+            opponentsHands.forEach((hand, idx) => {
+                let w = document.createElement('div');
+                w.style.display = 'inline-flex'; w.style.gap='5px'; w.style.marginRight='15px';
+                hand.forEach(c => w.appendChild(renderCard(c))); // reveal opponent cards
+                dArea.appendChild(w);
+            }); 
+
+            // Evaluate
+            const pScore = evaluate7Cards(playerHand, board);
+            let bestOppScore = -1;
+            let maxScoreCount = 0; // for tiebreakers
+
+            opponentsHands.forEach(hand => {
+                let s = evaluate7Cards(hand, board);
+                if (s > bestOppScore) bestOppScore = s;
+            });
+
+            if (pScore > bestOppScore) {
+                let payoutMulti = opponentsCount + 1; // 1 opp = 2x, 2 opp = 3x, 3 opp = 4x
+                let totalWin = (ante * 3) * payoutMulti;
+                stMsg.textContent = 'Wygrywasz! Pokonałeś wszystkich! Wypłacam ' + totalWin + ' PLN';
+                stMsg.style.color = '#00e676';
+                await processPayout(totalWin);
+            } else if (pScore < bestOppScore) {
+                stMsg.textContent = 'Przegrywasz! Jeden z przeciwników miał lepszą rękę.';
+                stMsg.style.color = '#ff3366';
+            } else {
+                stMsg.textContent = 'Remis z najlepszym przeciwnikiem! Zwracam zakłady (' + (ante*3) + ' PLN)';
+                stMsg.style.color = '#ffcc00';
+                await processPayout(ante * 3);
+            }
+
+            setTimeout(() => {
+                btnDeal.disabled = false; 
+                document.getElementById('bet-amount').disabled = false; 
+                document.getElementById('opponents-count').disabled = false;
+                stMsg.style.color = '#fff';
+                setTimeout(() => document.dispatchEvent(new Event('DOMContentLoaded')), 500); // refresh auth.js balance
+            }, 3000);
+        });
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>
+

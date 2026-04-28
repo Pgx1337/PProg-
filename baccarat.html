@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baccarat - Kasyno</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bacc-container { max-width: 900px; margin: 2rem auto; background: rgba(20,20,30,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2rem; text-align: center; box-shadow: 0 0 30px rgba(255, 51, 102, 0.1); position: relative; }
+        .cards-area { display: flex; justify-content: center; gap: 15px; min-height: 150px; margin: 1rem 0; flex-wrap: wrap; }
+        .card { width: 90px; height: 130px; background: #fff; color: #000; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative; }
+        .card.red { color: #ff3366; } .card.black { color: #111; }
+        .card-corner-top, .card-corner-bottom { position: absolute; font-size: 1rem; }
+        .card-corner-top { top: 5px; left: 5px; } .card-corner-bottom { bottom: 5px; right: 5px; transform: rotate(180deg); }
+        .controls { margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .btn-game { padding: 12px 20px; font-size: 1.1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-transform: uppercase; color: #000; }
+        .btn-player { background: #3388ff; } .btn-banker { background: #ff3366; } .btn-tie { background: #ffcc00; }
+        .btn-game:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .status { font-size: 1.8rem; font-weight: 800; margin: 1.5rem 0; height: 40px; color: #fff; }
+        .score-display { font-size: 1.5rem; color: #fff; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 10px; display: inline-block; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container"><h1 class="logo"><a href="strona.html" style="color: inherit; text-decoration: none;">Juszkowo Royale</a></h1></div>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="strona.html"><i class="fa-solid fa-gamepad"></i> Wróć do gier</a></li>
+                <li class="auth-wrapper" style="margin-left: auto;"></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="main-content">
+        <div class="bacc-container">
+            <div id="login-overlay" style="display: none; position: absolute; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 20px; justify-content: center; align-items: center; flex-direction: column;">
+                <h2 style="color: #ff3366; font-size: 2.5rem;"><i class="fa-solid fa-lock"></i> Brak Dostępu</h2>
+                <a href="logowanie.html" class="btn-game" style="background: #00e676; text-decoration: none; margin-top: 1rem;">Zaloguj się</a>
+            </div>
+            <h2><i class="fa-solid fa-diamond" style="color: #ff3366;"></i> Baccarat</h2>
+            <div class="status" id="status-msg">Wybierz zakład i zagraj!</div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 1.2rem; font-weight: bold;">Zakład (PLN):</label>
+                <input type="number" id="bet-amount" value="10" min="1" style="font-size: 1.2rem; padding: 5px; width: 100px; text-align: center; margin: 0 10px; background: #222; color: #fff; border: 1px solid #555; border-radius: 5px;">
+            </div>
+
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border-top: 4px solid #3388ff;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #3388ff; margin-bottom: 10px;">GRACZ (PLAYER)</div>
+                    <div class="score-display">Suma: <span id="player-score">0</span></div>
+                    <div class="cards-area" id="player-cards"></div>
+                </div>
+                <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border-top: 4px solid #ff3366;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #ff3366; margin-bottom: 10px;">BANKIER (BANKER)</div>
+                    <div class="score-display">Suma: <span id="banker-score">0</span></div>
+                    <div class="cards-area" id="banker-cards"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-game btn-player" id="btn-bet-player">Obstaw GRACZA (1:1)</button>
+                <button class="btn-game btn-tie" id="btn-bet-tie">Obstaw REMIS (8:1)</button>
+                <button class="btn-game btn-banker" id="btn-bet-banker">Obstaw BANKIERA (1:1)</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        const suits = ['♠', '♥', '♦', '♣'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        let isLogged = false;
+
+        async function verifyAuth() {
+            try {
+                const res = await fetch('/api/me');
+                if (res.ok) isLogged = true;
+                else document.getElementById('login-overlay').style.display = 'flex';
+            } catch (e) { console.error(e); }
+        }
+        verifyAuth();
+
+        function getCardValue(val) {
+            if (['10', 'J', 'Q', 'K'].includes(val)) return 0;
+            if (val === 'A') return 1;
+            return parseInt(val);
+        }
+
+        function calculateBaccaratScore(hand) {
+            let sum = 0;
+            hand.forEach(c => sum += getCardValue(c.value));
+            return sum % 10;
+        }
+
+        function renderHand(hand, elId, scoreId) {
+            const area = document.getElementById(elId);
+            area.innerHTML = '';
+            hand.forEach(card => {
+                const div = document.createElement('div');
+                div.className = 'card ' + (card.suit === '♥' || card.suit === '♦' ? 'red' : 'black');
+                div.innerHTML = `<div class="card-corner-top">${card.value}<br>${card.suit}</div>
+                                 <div style="font-size: 2.5rem;">${card.suit}</div>
+                                 <div class="card-corner-bottom">${card.value}<br>${card.suit}</div>`;
+                area.appendChild(div);
+            });
+            document.getElementById(scoreId).innerText = calculateBaccaratScore(hand);
+        }
+
+        function getDeck() {
+            let deck = [];
+            for(let i=0; i<6; i++) { // 6 decks
+                suits.forEach(suit => values.forEach(value => deck.push({suit, value})));
+            }
+            return deck.sort(() => Math.random() - 0.5);
+        }
+
+        async function playGame(betType) {
+            if (!isLogged) return;
+            const betInput = document.getElementById('bet-amount');
+            const betVal = parseFloat(betInput.value);
+            if (isNaN(betVal) || betVal <= 0) { alert('Nieprawidłowa stawka.'); return; }
+
+            // Disable buttons
+            const buttons = document.querySelectorAll('.btn-game');
+            buttons.forEach(b => b.disabled = true);
+            betInput.disabled = true;
+
+            const stMsg = document.getElementById('status-msg');
+            stMsg.textContent = 'Przyjmowanie zakładu...';
+
+            try {
+                const bRes = await fetch('/api/bet', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ amount: betVal, gameName: 'BACCARAT' })
+                });
+                if (!bRes.ok) throw new Error((await bRes.json()).error);
+            } catch (err) {
+                stMsg.textContent = err.message || 'Błąd zakładu.';
+                buttons.forEach(b => b.disabled = false);
+                betInput.disabled = false;
+                return;
+            }
+
+            stMsg.textContent = 'Trwa rozdanie...';
+            let deck = getDeck();
+            let pHand = [deck.pop(), deck.pop()];
+            let bHand = [deck.pop(), deck.pop()];
+
+            renderHand(pHand, 'player-cards', 'player-score');
+            renderHand(bHand, 'banker-cards', 'banker-score');
+
+            await new Promise(r => setTimeout(r, 1000));
+
+            let pScore = calculateBaccaratScore(pHand);
+            let bScore = calculateBaccaratScore(bHand);
+
+            // Natural 8 or 9
+            if (pScore < 8 && bScore < 8) {
+                // Player rules
+                let playerDrew = false;
+                let pThirdCardValue = -1;
+                if (pScore <= 5) {
+                    const c = deck.pop();
+                    pHand.push(c);
+                    pThirdCardValue = getCardValue(c.value);
+                    playerDrew = true;
+                    renderHand(pHand, 'player-cards', 'player-score');
+                    pScore = calculateBaccaratScore(pHand);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+                // Banker rules
+                let bankerDraws = false;
+                if (!playerDrew) {
+                    if (bScore <= 5) bankerDraws = true;
+                } else {
+                    if (bScore <= 2) bankerDraws = true;
+                    else if (bScore === 3 && pThirdCardValue !== 8) bankerDraws = true;
+                    else if (bScore === 4 && pThirdCardValue >= 2 && pThirdCardValue <= 7) bankerDraws = true;
+                    else if (bScore === 5 && pThirdCardValue >= 4 && pThirdCardValue <= 7) bankerDraws = true;
+                    else if (bScore === 6 && (pThirdCardValue === 6 || pThirdCardValue === 7)) bankerDraws = true;
+                }
+
+                if (bankerDraws) {
+                    bHand.push(deck.pop());
+                    renderHand(bHand, 'banker-cards', 'banker-score');
+                    bScore = calculateBaccaratScore(bHand);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+
+            // Determine winner
+            let winner = 'tie';
+            if (pScore > bScore) winner = 'player';
+            else if (bScore > pScore) winner = 'banker';
+
+            let payout = 0;
+            if (winner === betType) {
+                if (winner === 'tie') { payout = betVal * 9; stMsg.textContent = 'WYGRANA! Trafiono REMIS!'; stMsg.style.color = '#00e676'; }
+                else { payout = betVal * 2; stMsg.textContent = 'WYGRANA! Trafiono zakład na ' + winner.toUpperCase(); stMsg.style.color = '#00e676'; }
+            } else if (winner === 'tie' && (betType === 'player' || betType === 'banker')) {
+                // Tie pushes player and banker bets
+                payout = betVal; 
+                stMsg.textContent = 'ZWROT! Padł remis.'; stMsg.style.color = '#ffcc00';
+            } else {
+                stMsg.textContent = 'PRZEGRANA. Wygrywa ' + winner.toUpperCase(); stMsg.style.color = '#ff3366';
+            }
+
+            if (payout > 0) {
+                await fetch('/api/payout', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ amount: payout, gameName: 'BACCARAT' }) });
+            }
+
+            setTimeout(() => {
+                buttons.forEach(b => b.disabled = false);
+                betInput.disabled = false;
+                stMsg.style.color = '#fff';
+                setTimeout(() => document.dispatchEvent(new Event('DOMContentLoaded')), 500); // refresh auth.js balance
+            }, 1500);
+        }
+
+        document.getElementById('btn-bet-player').addEventListener('click', () => playGame('player'));
+        document.getElementById('btn-bet-banker').addEventListener('click', () => playGame('banker'));
+        document.getElementById('btn-bet-tie').addEventListener('click', () => playGame('tie'));
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>
+
